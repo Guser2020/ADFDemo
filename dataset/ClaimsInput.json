@@ -1,0 +1,109 @@
+{
+	"name": "ClaimsInput",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LinkedServiceStorageAccount",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "BACS_Claims_Detail_20200925.csv",
+				"folderPath": "Input",
+				"container": "adfdemo"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "orderId",
+				"type": "String"
+			},
+			{
+				"name": "payDate",
+				"type": "String"
+			},
+			{
+				"name": "clientuserId",
+				"type": "String"
+			},
+			{
+				"name": "accountId",
+				"type": "String"
+			},
+			{
+				"name": "originalBacsTransactionId",
+				"type": "String"
+			},
+			{
+				"name": "orderStatus",
+				"type": "String"
+			},
+			{
+				"name": "transactionId",
+				"type": "String"
+			},
+			{
+				"name": "parentTransactionId",
+				"type": "String"
+			},
+			{
+				"name": "createdDate",
+				"type": "String"
+			},
+			{
+				"name": "transactionType",
+				"type": "String"
+			},
+			{
+				"name": "currency",
+				"type": "String"
+			},
+			{
+				"name": "amount",
+				"type": "String"
+			},
+			{
+				"name": "transactionStatus",
+				"type": "String"
+			},
+			{
+				"name": "type",
+				"type": "String"
+			},
+			{
+				"name": "linked_transactionId",
+				"type": "String"
+			},
+			{
+				"name": "id",
+				"type": "String"
+			},
+			{
+				"name": "date",
+				"type": "String"
+			},
+			{
+				"name": "status",
+				"type": "String"
+			},
+			{
+				"name": "reasonCode",
+				"type": "String"
+			},
+			{
+				"name": "paymentDate",
+				"type": "String"
+			},
+			{
+				"name": "effectiveDate",
+				"type": "String"
+			}
+		]
+	}
+}
