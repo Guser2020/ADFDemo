@@ -1,0 +1,38 @@
+{
+	"name": "NostroBankAcc",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LinkedServiceStorageAccount",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "UK_NostroBankAcc.csv",
+				"folderPath": "Input",
+				"container": "adfdemo"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "TERRITORYID",
+				"type": "String"
+			},
+			{
+				"name": "NOSTRO_ACCOUNT",
+				"type": "String"
+			},
+			{
+				"name": "TERRITORY_CURRENCY",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

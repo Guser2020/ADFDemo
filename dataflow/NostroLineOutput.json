@@ -1,0 +1,45 @@
+{
+	"name": "NostroLineOutput",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "InputDatasetTemp",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "NostroBankAcc",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "InputDatasetTemp",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Aggregate1"
+				},
+				{
+					"name": "DerivedColumn1"
+				},
+				{
+					"name": "Lookup1"
+				}
+			],
+			"script": "source(output(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as double,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:['Output/DetailLine.csv']) ~> source1\nsource(output(\n\t\tTERRITORYID as string,\n\t\tNOSTRO_ACCOUNT as string,\n\t\tTERRITORY_CURRENCY as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source2\nsource1 aggregate(groupBy(Date,\n\t\t{AccountNo.} = '43000025',\n\t\tReference = 'eSuite Net Totals',\n\t\tDR_CR = 'D'),\n\tAmount = sum(Amount)) ~> Aggregate1\nLookup1 derive(Currency = TERRITORY_CURRENCY,\n\t\tTranscode = 'CLC',\n\t\tOffset_Account = '',\n\t\tBatchId = '',\n\t\tXrefType = '',\n\t\tXrefId = '',\n\t\tExtra = '') ~> DerivedColumn1\nAggregate1, source2 lookup({AccountNo.} == NOSTRO_ACCOUNT,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nDerivedColumn1 sink(input(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as string,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['NostroLine.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+		}
+	}
+}

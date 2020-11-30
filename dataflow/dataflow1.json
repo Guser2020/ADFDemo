@@ -1,0 +1,39 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "InputDataset",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "BankAccount",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "OutputDataset",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Lookup1"
+				}
+			],
+			"script": "source(output(\n\t\torderId as string,\n\t\tpayDate as string,\n\t\tclientuserId as string,\n\t\taccountId as string,\n\t\tstoreid as string,\n\t\toriginalBacsTransactionId as string,\n\t\torderStatus as string,\n\t\ttransactionId as string,\n\t\tparentTransactionId as string,\n\t\tcreatedDate as string,\n\t\ttransactionType as string,\n\t\tcurrency as string,\n\t\tamount as string,\n\t\ttransactionStatus as string,\n\t\ttype as string,\n\t\tlinked_transactionId as string,\n\t\tid as string,\n\t\tdate as string,\n\t\tstatus as string,\n\t\treasonCode as string,\n\t\tpaymentDate as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource(output(\n\t\tSTOREID as string,\n\t\tBANKACCOUNT as string,\n\t\tCURRENCY as string,\n\t\tTERRITORYID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source2\nsource1, source2 lookup(source1@storeid == source2@STOREID,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nLookup1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+		}
+	}
+}

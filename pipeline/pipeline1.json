@@ -1,0 +1,28 @@
+{
+	"name": "pipeline1",
+	"properties": {
+		"activities": [
+			{
+				"name": "AFPO call",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "http://cem4ssodamig01.uat.az.specsavers.com:8001/soa-infra/services/CommonServices/EventHandlerPublisherComposite/EventHandlerPublisherComposite_ep?WSDL",
+					"method": "POST",
+					"body": "<env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\">\n<env:Header/>\n<env:Body>\n<ns2:eventMessages \txmlns:ns2=\"http://xmlns.oracle.com/EventDetails\">\n<ns2:header>\n<serviceName>CLSP_UK_NetTotals</serviceName>\n<callingComponent>MPP-->ODI-->OpenAccounts</callingComponent>\n<eventID>1000</eventID>\n<eventType>ErrorEvent</eventType>\n<GUID>1000</GUID>\n<isDetailsRequired>\n<isDetailsRequired>Y</isDetailsRequired>\n<queryDetailsBy>1</queryDetailsBy>\n</isDetailsRequired>\n<spQueryId/>\n</ns2:header>\n<ns2:eventMessage>\n<ns2:errorEvent>\n<instanceId>1000</instanceId>\n<errorCode>Error Occuurred</errorCode>\n<errorDetails>Error Occurred</errorDetails>\n<timeStamp/>\n<errorSummary>Error Occured in step</errorSummary>\n<payload/>\n<ns2:logging>\n<isError/>\n<loggingFileName/>\n<loggingFileLocation/>\n<loggingStorageType>DB</loggingStorageType>\n<isLoggingRequired>Y</isLoggingRequired>\n<loggingSummary>Error Occured</loggingSummary>\n<loggingDetails>Loogg details</loggingDetails>\n</ns2:logging>\n<ns2:notification>\n<isError>Y</isError>\n<imBody/>\n<imTo/>\n<voiceMessage/>\n<smsSubject/>\n<smsTo/>\n<smsFrom/>\n<smsBody/>\n<emailSubject>Error processing  1000 transactions File for UK NetTotals</emailSubject>\n<emailBody>Email Body</emailBody>\n<emailID/>\n<isEmailPeriodic/>\n<isEmail>Y</isEmail>\n<isSMS/>\n<isIM/>\n<isVoice/>\n<isHumanIntervention/>\n<humanWorkflowGroups/>\n<humanTaskDetails/>\n<isNotificationRequired>Y</isNotificationRequired>\n<notificationSubject>Error Occured</notificationSubject>\n<notificationDetails>1000</notificationDetails>\n<isPNGeneric/>\n</ns2:notification>\n</ns2:errorEvent>\n<ns2:customEvent>\n<customMessage/>\n</ns2:customEvent>\n</ns2:eventMessage>\n</ns2:eventMessages>\n</env:Body>\n</env:Envelope>"
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2020-11-27T11:54:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

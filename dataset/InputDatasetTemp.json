@@ -1,0 +1,73 @@
+{
+	"name": "InputDatasetTemp",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LinkedServiceStorageAccount",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "Output",
+				"container": "adfdemo"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "Date",
+				"type": "String"
+			},
+			{
+				"name": "AccountNo.",
+				"type": "String"
+			},
+			{
+				"name": "Reference",
+				"type": "String"
+			},
+			{
+				"name": "DR_CR",
+				"type": "String"
+			},
+			{
+				"name": "Amount",
+				"type": "String"
+			},
+			{
+				"name": "Currency",
+				"type": "String"
+			},
+			{
+				"name": "Transcode",
+				"type": "String"
+			},
+			{
+				"name": "Offset_Account",
+				"type": "String"
+			},
+			{
+				"name": "BatchId",
+				"type": "String"
+			},
+			{
+				"name": "XrefType",
+				"type": "String"
+			},
+			{
+				"name": "XrefId",
+				"type": "String"
+			},
+			{
+				"name": "Extra",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,39 @@
+{
+	"name": "AggregateFiles",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "InputDatasetTemp",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "InputDatasetTemp",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "InputDatasetTemp",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Union1"
+				}
+			],
+			"script": "source(output(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as string,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:['Output/DetailLine.csv']) ~> source1\nsource(output(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as string,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:['Output/NostroLine.csv']) ~> source2\nsource1, source2 union(byName: true)~> Union1\nUnion1 sink(input(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as string,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['NetTotalUKOutputFile.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
+		}
+	}
+}
