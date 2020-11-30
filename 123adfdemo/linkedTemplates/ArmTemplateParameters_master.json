@@ -10,6 +10,12 @@
 		},
 		"HttpLinkedService_properties_typeProperties_url": {
 			"value": "http://www.dneonline.com/calculator.asmx"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
 		}
 	}
 }
