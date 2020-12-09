@@ -517,6 +517,31 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/Json1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedServiceStorageAccount",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "sample1.json",
+						"folderPath": "Output",
+						"container": "adfdemo"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedServiceStorageAccount')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/NostroBankAcc')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -618,7 +643,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": "SFFile.csv",
+						"fileName": "SFFile.json",
 						"folderPath": "Output",
 						"container": "adfdemo"
 					},
@@ -815,14 +840,12 @@
 								"requestMethod": "GET"
 							},
 							"sink": {
-								"type": "DelimitedTextSink",
+								"type": "JsonSink",
 								"storeSettings": {
 									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
+									"type": "JsonWriteSettings"
 								}
 							},
 							"enableStaging": false
@@ -836,7 +859,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "SFOutPutFile",
+								"referenceName": "Json1",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -847,7 +870,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/RestResource1')]",
-				"[concat(variables('factoryId'), '/datasets/SFOutPutFile')]"
+				"[concat(variables('factoryId'), '/datasets/Json1')]"
 			]
 		},
 		{
@@ -896,50 +919,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/OutputDataset')]",
 				"[concat(variables('factoryId'), '/linkedServices/LinkedServiceStorageAccount')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AggregateFiles')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "InputDatasetTemp",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						},
-						{
-							"dataset": {
-								"referenceName": "InputDatasetTemp",
-								"type": "DatasetReference"
-							},
-							"name": "source2"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "InputDatasetTemp",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Union1"
-						}
-					],
-					"script": "source(output(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as string,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:['Output/DetailLine.csv']) ~> source1\nsource(output(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as string,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:['Output/NostroLine.csv']) ~> source2\nsource1, source2 union(byName: true)~> Union1\nUnion1 sink(input(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as string,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['NetTotalUKOutputFile.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/InputDatasetTemp')]"
 			]
 		}
 	]
