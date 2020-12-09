@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "SFFile.csv",
+				"fileName": "SFFile.json",
 				"folderPath": "Output",
 				"container": "adfdemo"
 			},
