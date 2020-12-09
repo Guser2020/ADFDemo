@@ -11,9 +11,21 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LinkedServiceStorageAccount'"
 		},
+		"RestServiceSuccFact_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'RestServiceSuccFact'"
+		},
 		"HttpLinkedService_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "http://www.dneonline.com/calculator.asmx"
+		},
+		"RestServiceSuccFact_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://api2.successfactors.eu/odata/v2"
+		},
+		"RestServiceSuccFact_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "SPECADMSF@specSF2DEV"
 		}
 	},
 	"variables": {
@@ -129,6 +141,26 @@
 				"type": "AzureBlobStorage",
 				"typeProperties": {
 					"connectionString": "[parameters('LinkedServiceStorageAccount_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RestServiceSuccFact')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('RestServiceSuccFact_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Basic",
+					"userName": "[parameters('RestServiceSuccFact_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('RestServiceSuccFact_password')]"
+					}
 				}
 			},
 			"dependsOn": []
@@ -555,6 +587,101 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/RestResource1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "RestServiceSuccFact",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/RestServiceSuccFact')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SFOutPutFile')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedServiceStorageAccount",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "SFFile.csv",
+						"folderPath": "Output",
+						"container": "adfdemo"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedServiceStorageAccount')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SoapDataSetBinary')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -663,6 +790,67 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/SuccessFactor')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CopydataFromSF",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "RestResource1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SFOutPutFile",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/RestResource1')]",
+				"[concat(variables('factoryId'), '/datasets/SFOutPutFile')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -752,281 +940,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/InputDatasetTemp')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DetailLinesOutput')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "InputDataset",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						},
-						{
-							"dataset": {
-								"referenceName": "BankAccount",
-								"type": "DatasetReference"
-							},
-							"name": "source2"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "InputDatasetTemp",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Aggregate1"
-						},
-						{
-							"name": "DerivedColumn1"
-						},
-						{
-							"name": "Lookup1"
-						},
-						{
-							"name": "Lookup2"
-						}
-					],
-					"script": "source(output(\n\t\torderId as string,\n\t\tpayDate as string,\n\t\tclientuserId as string,\n\t\taccountId as string,\n\t\tstoreid as string,\n\t\toriginalBacsTransactionId as string,\n\t\torderStatus as string,\n\t\ttransactionId as string,\n\t\tparentTransactionId as string,\n\t\tcreatedDate as string,\n\t\ttransactionType as string,\n\t\tcurrency as string,\n\t\tamount as double,\n\t\ttransactionStatus as string,\n\t\ttype as string,\n\t\tlinked_transactionId as string,\n\t\tid as string,\n\t\tdate as string,\n\t\tstatus as string,\n\t\treasonCode as string,\n\t\tpaymentDate as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource(output(\n\t\tSTOREID as string,\n\t\tBANKACCOUNT as string,\n\t\tCURRENCY as string,\n\t\tTERRITORYID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source2\nLookup1 aggregate(groupBy(Date = '03/11/2020',\n\t\t{AccountNo.} = BANKACCOUNT,\n\t\tReference = 'Contact Lens Credits',\n\t\tDR_CR = 'C'),\n\tAmount = sum(amount)) ~> Aggregate1\nLookup2 derive(Currency = CURRENCY,\n\t\tTranscode = 'CLC',\n\t\tOffset_Account = '',\n\t\tBatchId = '',\n\t\tXrefType = '',\n\t\tXrefId = '',\n\t\tExtra = '') ~> DerivedColumn1\nsource1, source2 lookup(source1@storeid == source2@STOREID,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nAggregate1, source2 lookup({AccountNo.} == BANKACCOUNT,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup2\nDerivedColumn1 sink(input(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as string,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['DetailLine.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/InputDataset')]",
-				"[concat(variables('factoryId'), '/datasets/BankAccount')]",
-				"[concat(variables('factoryId'), '/datasets/InputDatasetTemp')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/NostroLineOutput')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "InputDatasetTemp",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						},
-						{
-							"dataset": {
-								"referenceName": "NostroBankAcc",
-								"type": "DatasetReference"
-							},
-							"name": "source2"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "InputDatasetTemp",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Aggregate1"
-						},
-						{
-							"name": "DerivedColumn1"
-						},
-						{
-							"name": "Lookup1"
-						}
-					],
-					"script": "source(output(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as double,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:['Output/DetailLine.csv']) ~> source1\nsource(output(\n\t\tTERRITORYID as string,\n\t\tNOSTRO_ACCOUNT as string,\n\t\tTERRITORY_CURRENCY as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source2\nsource1 aggregate(groupBy(Date,\n\t\t{AccountNo.} = '43000025',\n\t\tReference = 'eSuite Net Totals',\n\t\tDR_CR = 'D'),\n\tAmount = sum(Amount)) ~> Aggregate1\nLookup1 derive(Currency = TERRITORY_CURRENCY,\n\t\tTranscode = 'CLC',\n\t\tOffset_Account = '',\n\t\tBatchId = '',\n\t\tXrefType = '',\n\t\tXrefId = '',\n\t\tExtra = '') ~> DerivedColumn1\nAggregate1, source2 lookup({AccountNo.} == NOSTRO_ACCOUNT,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nDerivedColumn1 sink(input(\n\t\tDate as string,\n\t\t{AccountNo.} as string,\n\t\tReference as string,\n\t\tDR_CR as string,\n\t\tAmount as string,\n\t\tCurrency as string,\n\t\tTranscode as string,\n\t\tOffset_Account as string,\n\t\tBatchId as string,\n\t\tXrefType as string,\n\t\tXrefId as string,\n\t\tExtra as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['NostroLine.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/InputDatasetTemp')]",
-				"[concat(variables('factoryId'), '/datasets/NostroBankAcc')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/dataflow1')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "InputDataset",
-								"type": "DatasetReference"
-							},
-							"name": "source1"
-						},
-						{
-							"dataset": {
-								"referenceName": "BankAccount",
-								"type": "DatasetReference"
-							},
-							"name": "source2"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
-								"referenceName": "OutputDataset",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "Lookup1"
-						}
-					],
-					"script": "source(output(\n\t\torderId as string,\n\t\tpayDate as string,\n\t\tclientuserId as string,\n\t\taccountId as string,\n\t\tstoreid as string,\n\t\toriginalBacsTransactionId as string,\n\t\torderStatus as string,\n\t\ttransactionId as string,\n\t\tparentTransactionId as string,\n\t\tcreatedDate as string,\n\t\ttransactionType as string,\n\t\tcurrency as string,\n\t\tamount as string,\n\t\ttransactionStatus as string,\n\t\ttype as string,\n\t\tlinked_transactionId as string,\n\t\tid as string,\n\t\tdate as string,\n\t\tstatus as string,\n\t\treasonCode as string,\n\t\tpaymentDate as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source1\nsource(output(\n\t\tSTOREID as string,\n\t\tBANKACCOUNT as string,\n\t\tCURRENCY as string,\n\t\tTERRITORYID as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> source2\nsource1, source2 lookup(source1@storeid == source2@STOREID,\n\tmultiple: false,\n\tpickup: 'any',\n\tbroadcast: 'auto')~> Lookup1\nLookup1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> sink1"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/InputDataset')]",
-				"[concat(variables('factoryId'), '/datasets/BankAccount')]",
-				"[concat(variables('factoryId'), '/datasets/OutputDataset')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/NetTotalUK')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "DetailLine",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "DetailLinesOutput",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {},
-									"source2": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
-						"name": "NostroLineOutput",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [
-							{
-								"activity": "DetailLine",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "NostroLineOutput",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {},
-									"source2": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					},
-					{
-						"name": "AggregateFiles",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [
-							{
-								"activity": "NostroLineOutput",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "AggregateFiles",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"source1": {},
-									"source2": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"annotations": [],
-				"lastPublishTime": "2020-11-05T21:15:38Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/DetailLinesOutput')]",
-				"[concat(variables('factoryId'), '/dataflows/NostroLineOutput')]",
-				"[concat(variables('factoryId'), '/dataflows/AggregateFiles')]"
 			]
 		}
 	]

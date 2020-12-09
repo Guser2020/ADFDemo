@@ -11,9 +11,21 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'LinkedServiceStorageAccount'"
 		},
+		"RestServiceSuccFact_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'RestServiceSuccFact'"
+		},
 		"HttpLinkedService_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "http://www.dneonline.com/calculator.asmx"
+		},
+		"RestServiceSuccFact_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://api2.successfactors.eu/odata/v2"
+		},
+		"RestServiceSuccFact_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "SPECADMSF@specSF2DEV"
 		},
 		"containerUri": {
 			"type": "string",
@@ -45,12 +57,41 @@
 					"LinkedServiceStorageAccount_connectionString": {
 						"value": "[parameters('LinkedServiceStorageAccount_connectionString')]"
 					},
+					"RestServiceSuccFact_password": {
+						"value": "[parameters('RestServiceSuccFact_password')]"
+					},
 					"HttpLinkedService_properties_typeProperties_url": {
 						"value": "[parameters('HttpLinkedService_properties_typeProperties_url')]"
+					},
+					"RestServiceSuccFact_properties_typeProperties_url": {
+						"value": "[parameters('RestServiceSuccFact_properties_typeProperties_url')]"
+					},
+					"RestServiceSuccFact_properties_typeProperties_userName": {
+						"value": "[parameters('RestServiceSuccFact_properties_typeProperties_userName')]"
 					}
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "123adfdemo_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', '123adfdemo_ArmTemplate_0')]"
+			]
 		}
 	]
 }

@@ -8,8 +8,17 @@
 		"LinkedServiceStorageAccount_connectionString": {
 			"value": ""
 		},
+		"RestServiceSuccFact_password": {
+			"value": ""
+		},
 		"HttpLinkedService_properties_typeProperties_url": {
 			"value": "http://www.dneonline.com/calculator.asmx"
+		},
+		"RestServiceSuccFact_properties_typeProperties_url": {
+			"value": "https://api2.successfactors.eu/odata/v2"
+		},
+		"RestServiceSuccFact_properties_typeProperties_userName": {
+			"value": "SPECADMSF@specSF2DEV"
 		}
 	}
 }
